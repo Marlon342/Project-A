@@ -1,0 +1,33 @@
+import requests
+
+class DevinexisCore:
+    def __init__(self, token):
+        self.token = token
+        self.base_url = f"https://api.telegram.org/bot{token}/"
+        self.commands = {}
+        self.middlewares = []
+
+    def get_updates(self, offset=None):
+        params = {"timeout": 100, "offset": offset}
+        return requests.get(self.base_url + "getUpdates", params=params).json()
+
+    def send_message(self, chat_id, text):
+        data = {"chat_id": chat_id, "text": text}
+        requests.post(self.base_url + "sendMessage", data=data)
+
+    def add_command(self, name, func):
+        self.commands[name] = func
+
+    def process_message(self, message, chat_id):
+        text = message.lower()
+
+        for mw in self.middlewares:
+            if not mw(text):
+                return
+
+        if text in self.commands:
+            response = self.commands[text](message)
+        else:
+            response = f"Unknown command: {message}"
+
+        self.send_message(chat_id, response)
