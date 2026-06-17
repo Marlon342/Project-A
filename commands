@@ -1,0 +1,5 @@
+def start(message):
+    return "Welcome to Devinexis Framework 🤖"
+
+def help_cmd(message):
+    return "Commands: /start /help"
