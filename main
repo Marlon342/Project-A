@@ -1,0 +1,39 @@
+import time
+from core import DevinexisCore
+import commands
+import middleware
+
+TOKEN = "YOUR_BOT_TOKEN"
+
+bot = DevinexisCore(TOKEN)
+
+# commands
+bot.add_command("/start", commands.start)
+bot.add_command("/help", commands.help_cmd)
+
+# middleware
+bot.middlewares.append(middleware.basic_filter)
+
+def run():
+    offset = None
+
+    print("Devinexis Framework running...")
+
+    while True:
+        updates = bot.get_updates(offset)
+
+        for update in updates.get("result", []):
+            offset = update["update_id"] + 1
+
+            if "message" not in update:
+                continue
+
+            msg = update["message"]
+            text = msg.get("text", "")
+            chat_id = msg["chat"]["id"]
+
+            bot.process_message(text, chat_id)
+
+        time.sleep(1)
+
+run()
